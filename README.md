@@ -4,9 +4,11 @@
 ```mermaid
 sequenceDiagram
 Web ->> AI: Asynchronous semi-annotate labeling (via RabbitMQ)
-Web ->> AI: Get result
-Web ->> AI: Asynchronous key information extraction (via RabbitMQ)
-Web ->> AI: Get result
+AI -->> Web: Return result (via RabbitMQ)
+Web ->> AI: Asynchronous training (via RabbitMQ)
+AI -->> Web: Return result (via RabbitMQ)
+Web ->> AI: Asynchronous document analysis (via RabbitMQ)
+AI -->> Web: Return result (via RabbitMQ)
 ```
 
 ## :fire:  Asynchronous Semi-annotate Labeling
@@ -28,7 +30,23 @@ After creating a new document type, we need to provide semi-annotated labels for
 |request_id|STRING|The unique identifier for the request.|
 |document|[DocumentAnalysis](#fire-document-analysis)||
 
-## :fire: Asynchronous Key Information Extraction
+## :fire: Asynchronous Training
+
+### :arrow_right: Request Structure
+
+|Field Name|Type|Description|
+|--|--|--|
+|request_id| STRING | The unique identifier for the request.|
+|document_type|[DocumentType](#fire-documenttype)|Document Type detail.|
+
+### :arrow_left: Response Structure
+
+|Field Name|Type|Description|
+|--|--|--|
+|request_id|STRING|The unique identifier for the request.|
+|accuracy|FLOAT|The average accuracy of model on the training data.|
+
+## :fire: Asynchronous Document Analysis
 After training successfully, the **AI Backend** will have sufficient AI models and post-processing rules for a full pipeline of intelligence document processing. 
 
 ### :arrow_right: Request Structure
@@ -221,8 +239,8 @@ PageAnalysis
 | height | INT64 | Height of the page image. |
 | class | STRING | Classification result of the page. |
 | text_extraction | [TextExtraction](#fire-textextraction) | text extraction result. |
-| form_extraction | [FormExtraction(#fire-formextraction) | form extraction result. |
-| table_extraction | [TableExtraction(#fire-tableextraction) | table extraction result. |
+| form_extraction | [FormExtraction](#fire-formextraction) | form extraction result. |
+| table_extraction | [TableExtraction](#fire-tableextraction) | table extraction result. |
 
 ## :fire: TextExtraction
 
