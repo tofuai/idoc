@@ -1,4 +1,4 @@
-# :exclamation: REST API Web Backend to AI Backend
+# :exclamation: Asynchronous API Web Backend to AI Backend
 
 
 ```mermaid
@@ -6,23 +6,27 @@ sequenceDiagram
 Web ->> AI: Asynchronous semi-annotate labeling (via RabbitMQ)
 Web ->> AI: Get result
 Web ->> AI: Asynchronous key information extraction (via RabbitMQ)
-Web -> AI: Get result
+Web ->> AI: Get result
 ```
 
 ## :fire:  Asynchronous Semi-annotate Labeling
-After creating a new document type, we need to provide semi-annotated labels for the new training data. This process shortens human labeling time. Basically, it is the same as **Asynchronous Key Information Extraction** process, however, we add **Form Extraction** for basic understanding of some additional form fields, not provided by the base document type.  The training process is to create **Key Information Extraction** model, and post-processing rules.
+After creating a new document type, we need to provide semi-annotated labels for the new training data. This process shortens human labeling time. Basically, it is the same as **Asynchronous Key Information Extraction** with AI model and post-processin rules from the base document type.
 
 ### :arrow_right: Request Structure
 
 |Field Name|Type|Description|
 |--|--|--|
-||||
+|request_id| STRING | The unique identifier for the request.|
+|document_type|[DocumentType](#fire-documenttype)|Document Type detail.|
+|url| STRING | URL to the document need to apply automatic semi-labelling. |
+|output_queue_name | STRING | Output queue name to store the return result.|
 
-### :arrow_left: Request Structure
+### :arrow_left: Response Structure
 
 |Field Name|Type|Description|
 |--|--|--|
-||||
+|request_id|STRING|The unique identifier for the request.|
+|document|[DocumentAnalysis](#fire-document-analysis)||
 
 ## :fire: Asynchronous Key Information Extraction
 After training successfully, the **AI Backend** will have sufficient AI models and post-processing rules for a full pipeline of intelligence document processing. 
@@ -31,12 +35,16 @@ After training successfully, the **AI Backend** will have sufficient AI models a
 
 |Field Name|Type|Description|
 |--|--|--|
-|document_type|[DocumentType](#documenttype)|Document Type detail|
+|request_id|STRING|Unique identifier for each request.|
+|document_type|[DocumentType](#fire-documenttype)|Document Type detail.|
+|url|STRING|Url to the document.|
+|output_queue_name|STRING|Output queue name to store the return result.|
 
-### :arrow_left: Request Structure
+### :arrow_left: Response Structure
 
 |Field Name|Type|Description|
 |--|--|--|
+|document|[DocumentAnalysis](#fire-document-analysis)||
 |text_extraction|JSON|The raw text extracted from a document.|
 |form_extraction|JSON|Form data extraction with specific fields. They are represented as key-value pair.|
 |table_extraction|JSON|Table extraction with specific fields. They are seperated and matched base on column header.|
@@ -49,10 +57,10 @@ AI ->> Web: create document type
 Web -->> AI: return result
 AI ->> Web: update document type
 Web -->> AI: return result
-AI ->> Web: list document type
-Web -->> AI: return result
 AI ->> Web: get document type
-Web -->> AI: return result 
+Web -->> AI: return result
+AI ->> Web: delete document type
+Web -->> AI: return result
 ```
 
 ## :fire: Create Document Type
@@ -65,67 +73,74 @@ Web -->> AI: return result
 
 |Field Name|Type|Description|
 |--|--|--|
-||||
+| name | STRING | Human readable name that identifiers the document type. This name must be unique in each tenant. | description | STRING | Description for this document type. |
+| base_document_type_id | STRING | The identifier of the base document type for quick set-up and automatic semi-labeling. |
+|language_code|STRING|Primary [language code](http://www.lingoes.net/en/translator/langcode.htm) for this document type.|
+| ocr_engine | STRING | OCR Engine to applied for this document type. |
+| form_fields | An array for [FormField](formfield) | Metadata for form fields. **Note** that the form field name must be unique in each document type. |
+| tables | An array for [Table](table) | Configuration for table. **Note** that the table name must be unique in each document type.) |
 
-### :arrow_left: Request Structure
+### :arrow_left: Response Structure
 
 |Field Name|Type|Description|
 |--|--|--|
-||||
+| document_type | [DocumentType](#fire-documenttype) | Document Type Object.  |
 
-## :fire: Update Document Type
+## :fire: Update Document Type by id
 
 |Endpoint|HTTP Method|
 |--|--|
-|2.0/idp/document_type/create|POST|
+|2.0/idp/document_type/update|POST|
 
 ### :arrow_right: Request Structure
 
 |Field Name|Type|Description|
 |--|--|--|
-||||
+| document_type_id | STRING | Unique identifier for the document type. |
+|description|STRING|Description for this document type.|
+| active | BOOL | Current active status of the document. If true, user in the same tenant can use this document type. |
+| public | BOOL | If the document type is public, all user can apply it for their own pipeline. This option is only available for the **AI Team** to create global base model.  |
+| form_fields | An array for [FormField](formfield) |  for form fields. **Note** that the form field name must be unique in each document type. |
+| tables | An array for [Table](table) | Configuration for table. **Note** that the table name must be unique in each document type.) |
 
-### :arrow_left: Request Structure
+
+### :arrow_left: Response Structure
 
 |Field Name|Type|Description|
 |--|--|--|
-||||
+| document_type | [DocumentType](#fire-documenttype) | Document Type Object.  |
 
-## :fire: List Document Type
+
+## :fire: Get Document Type by id
 
 |Endpoint|HTTP Method|
 |--|--|
-|2.0/idp/document_type/create|POST|
+|2.0/idp/document_type/get|POST|
 
 ### :arrow_right: Request Structure
 
 |Field Name|Type|Description|
 |--|--|--|
-||||
+| document_type_id | STRING | Unique identifier for the document type. |
 
-### :arrow_left: Request Structure
+### :arrow_left: Response Structure
 
 |Field Name|Type|Description|
 |--|--|--|
-||||
+| document_type | [DocumentType](#fire-documenttype) | Document Type Object.  |
 
-## :fire: Get Document Type
+## :fire: Delete Document Type by id
 
 |Endpoint|HTTP Method|
 |--|--|
-|2.0/idp/document_type/create|POST|
+|2.0/idp/document_type/delete|POST|
 
 ### :arrow_right: Request Structure
 
 |Field Name|Type|Description|
 |--|--|--|
-||||
+| document_type_id | STRING | Unique identifier for the document type. |
 
-### :arrow_left: Request Structure
-
-|Field Name|Type|Description|
-|--|--|--|
-||||
 
 # :exclamation: Data Structure
 
@@ -135,21 +150,22 @@ Document type
 
 | Field Name | Type | Description |
 |--|--|--|
-| document_type_id | STRING | Unique identifier for the document type |
-| tenant_id | STRING | Unique identifier for the tenant. ```global``` if this document type is created by **AI Backend**. 
-| base_document_type_id | STRING | Use the base document type for quick setup and semi-automatic labeling. |
-| name | STRING | Human readable name that identifiers the document type |
-| public | BOOL | Current public stasge of the doåcument. If the documents is own by **AI Backend** and also be public, other user can apply it for their own pipeline.  |
-| language | STRING | Primary language of this document type. |
+| document_type_id | STRING | Unique identifier for the document type. |
+| tenant_id | STRING | Unique identifier for the tenant. |
+| base_document_type_id | STRING | The identifier of the base document type for quick set-up and automatic semi-labeling. |
+| name | STRING | Human readable name that identifiers the document type. This name must be unique in each tenant. |
+| active | BOOL | Current active status of the document. If true, user in the same tenant can use this document type. |
+| public | BOOL | If the document type is public, all user can apply it for their own pipeline. This option is only available for the **AI Team** to create base model.  |
+| language_code | STRING | Primary [language code](http://www.lingoes.net/en/translator/langcode.htm) for this document type. |
 | ocr_engine | STRING | OCR Engine to applied for this document type. |
-| form_fields | An array for [FormField](formfield) | Metadata for form fields. **Note** that the form field name must be unique per document type. |
-| table_fields | An array for [TableField](tablefield) | Metadata for table field. **Note** that the table field 
+| form_field_configs | An array for [FormField](formfield) | A list of configurations for mutiple form fields. **Note** that the form field name must be unique in each document type. |
+| table_configs | An array for [Table](table) | A list of configurations for multiple tables. **Note** that the table name must be unique in each document type.) | 
 | last_update_time | INT64 | Last update time. |
 | creation_time | INT64 | Creation time. |
 
-## :fire: FormFields
+## :fire: FormFieldConfig
 
-Form field for extraction
+Form field
 
 | Field Name | Type | Description |
 |--|--|--|
@@ -157,22 +173,77 @@ Form field for extraction
 | alias | an array of STRING | A list of alias texts for the field label. |
 | data_type | STRING | Data type for validation. |
 | required | BOOL | True if this field is required. |
-| starts_with | STRING | The validation rule starts with . |
-| ends_with | STRING | The validation rule ends with . |
-| pattern | STRING | A pattern helps define an acceptable format for data. |
 | logic_code | STRING | Python logic code for post-processing. |
 
-## :fire: TableFields
+## :fire: TableConfig
 
-Table field for extraction
+Table
+
+| Field Name |  Type | Description |
+|--|--|--|
+| name | STRING | Unique identifier for the table. |
+| required | BOOL | True if this field is required. |
+| logic_code | STRING | Python logic code for post-processing. |
+| column_configs | An array for [ColumnConfig](#fire-columnconfig) | A list of configurations for multiple table columns.  **Note** that the table column name must be unique in each table. |
+
+## :fire: ColumnConfig
+
+Column
 
 | Field Name | Type | Description |
 |--|--|--|
-| name | STRING | Unique identifier for the table field. |
-| alias | an array of STRING | A list of alias texts for the column name. |
+| name | STRING | Unique identifier for the table column. |
+| alias | an array of STRING | A list of alias texts for the column header label. |
 | data_type | STRING | Data type for validation. |
 | required | BOOL | True if this field is required. |
-| starts_with | STRING | The validation rule starts with. |
-| ends_with | STRING | The validation rule ends with. |
-| pattern | STRING | A pattern helps define an acceptable format for data. |
 | logic_code | STRING | Python logic code for post-processing. |
+
+## :fire: DocumentAnalysis
+
+DocumentAnalysis
+
+| Field Name | Type | Description |
+|--|--|--|
+| document_id | STRING | Unique identifier for the document. |
+| document_type_id | STRING | Unique identifier for the document type. |
+| version | STRING  | Document analysis model version. |
+| path | STRING | Path of the original document. |
+| pages | An array of [PageAnalysis](#fire-pageanalysis) | A list of page data. |
+| num_page | INT64 | Number of pages in the document. |
+
+## :fire: PageAnalysis
+
+PageAnalysis
+
+| Field Name | Type | Description |
+|--|--|--|
+| width | INT64 | Width of the page image. |
+| height | INT64 | Height of the page image. |
+| class | STRING | Classification result of the page. |
+| text_extraction | [TextExtraction](#fire-textextraction) | text extraction result. |
+| form_extraction | [FormExtraction(#fire-formextraction) | form extraction result. |
+| table_extraction | [TableExtraction(#fire-tableextraction) | table extraction result. |
+
+## :fire: TextExtraction
+
+TextExtraction
+
+| Field Name | Type | Description |
+|--|--|--|
+|  |  |  |
+
+## :fire: FormExtraction
+
+FormExtraction
+
+| Field Name | Type | Description |
+|--|--|--|
+|  |  |  |
+
+## :fire: TableExtraction
+
+TableExtraction
+
+| Field Name | Type | Description |
+|--|--|--|
+|  |  |  |
