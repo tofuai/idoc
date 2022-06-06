@@ -28,7 +28,8 @@ After creating a new document type, we need to provide semi-annotated labels for
 |Field Name|Type|Description|
 |--|--|--|
 |request_id|STRING|The unique identifier for the request.|
-|document|[DocumentAnalysis](#fire-document-analysis)||
+|status|STRING|The status of request, success or fail.|
+|document_analysis_id|STRING|The unique identifier for the document analysis result.|
 
 ## :fire: Asynchronous Training
 
@@ -38,12 +39,14 @@ After creating a new document type, we need to provide semi-annotated labels for
 |--|--|--|
 |request_id| STRING | The unique identifier for the request.|
 |document_type|[DocumentType](#fire-documenttype)|Document Type detail.|
+|document_analysis_ids|An array of STRING| A list of document analysis id. |
 
 ### :arrow_left: Response Structure
 
 |Field Name|Type|Description|
 |--|--|--|
 |request_id|STRING|The unique identifier for the request.|
+|status|STRING|The status of request, success or fail.|
 |accuracy|FLOAT|The average accuracy of model on the training data.|
 
 ## :fire: Asynchronous Document Analysis
@@ -55,7 +58,7 @@ After training successfully, the **AI Backend** will have sufficient AI models a
 |--|--|--|
 |request_id|STRING|Unique identifier for each request.|
 |document_type|[DocumentType](#fire-documenttype)|Document Type detail.|
-|url|STRING|Url to the document.|
+|url|STRING|S3 url to the document.|
 |output_queue_name|STRING|Output queue name to store the return result.|
 
 ### :arrow_left: Response Structure
@@ -71,14 +74,22 @@ After training successfully, the **AI Backend** will have sufficient AI models a
 
 ```mermaid
 sequenceDiagram
-AI ->> Web: create document type
-Web -->> AI: return result
-AI ->> Web: update document type
-Web -->> AI: return result
-AI ->> Web: get document type
-Web -->> AI: return result
-AI ->> Web: delete document type
-Web -->> AI: return result
+AI ->> Web: Create document type
+Web -->> AI: Return result
+AI ->> Web: Update document type by id
+Web -->> AI: Return result
+AI ->> Web: Get document type by id
+Web -->> AI: Return result
+AI ->> Web: Delete document type by id
+Web -->> AI: Return result
+AI ->> Web: Save document analysis result
+Web -->> AI: Return result
+AI ->> Web: Get document analysis result by id
+Web -->> AI: Return result
+AI ->> Web: Update document analysis result by id
+Web -->> AI: Return result
+AI ->> Web: Delete document analysis result by id
+Web -->> AI: Return result
 ```
 
 ## :fire: Create Document Type
@@ -115,7 +126,7 @@ Web -->> AI: return result
 |Field Name|Type|Description|
 |--|--|--|
 | document_type_id | STRING | Unique identifier for the document type. |
-|description|STRING|Description for this document type.|
+| description |STRING|Description for this document type.|
 | active | BOOL | Current active status of the document. If true, user in the same tenant can use this document type. |
 | public | BOOL | If the document type is public, all user can apply it for their own pipeline. This option is only available for the **AI Team** to create global base model.  |
 | form_fields | An array for [FormField](formfield) |  for form fields. **Note** that the form field name must be unique in each document type. |
@@ -264,4 +275,11 @@ TableExtraction
 
 | Field Name | Type | Description |
 |--|--|--|
-|  |  |  |
+| Column |  |  |
+
+# Column
+
+| Field Name | Type | Description |
+|--|--|--|
+| Key |  |  |
+| Value |  |  |
