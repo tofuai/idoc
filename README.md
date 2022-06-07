@@ -108,6 +108,8 @@ Web -->> AI: Return result
 | ocr_engine | STRING | OCR Engine to applied for this document type. |
 | form_fields | An array for [FormField](formfield) | Metadata for form fields. **Note** that the form field name must be unique in each document type. |
 | tables | An array for [Table](table) | Configuration for table. **Note** that the table name must be unique in each document type.) |
+| ai_config | JSON | Config for **AI Backend** |
+
 
 ### :arrow_left: Response Structure
 
@@ -131,6 +133,7 @@ Web -->> AI: Return result
 | public | BOOL | If the document type is public, all user can apply it for their own pipeline. This option is only available for the **AI Team** to create global base model.  |
 | form_fields | An array for [FormField](formfield) |  for form fields. **Note** that the form field name must be unique in each document type. |
 | tables | An array for [Table](table) | Configuration for table. **Note** that the table name must be unique in each document type.) |
+| ai_config | JSON | Config for **AI Backend** |
 
 
 ### :arrow_left: Response Structure
@@ -189,6 +192,7 @@ Document type
 | ocr_engine | STRING | OCR Engine to applied for this document type. |
 | form_field_configs | An array for [FormField](formfield) | A list of configurations for mutiple form fields. **Note** that the form field name must be unique in each document type. |
 | table_configs | An array for [Table](table) | A list of configurations for multiple tables. **Note** that the table name must be unique in each document type.) | 
+| ai_config | JSON | Config for **AI Backend** |
 | last_update_time | INT64 | Last update time. |
 | creation_time | INT64 | Creation time. |
 
