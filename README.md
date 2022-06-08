@@ -12,7 +12,7 @@ AI -->> Web: Return result (via RabbitMQ)
 ```
 
 ## :fire:  Asynchronous Semi-annotate Labeling
-After creating a new document type, we need to provide semi-annotated labels for the new training data. This process shortens human labeling time. Basically, it is the same as **Asynchronous Key Information Extraction** with AI model and post-processin rules from the base document type.
+After creating a new document type, we need to provide semi-annotated labels for the new training data. This process shortens human labeling time. Basically, it is the same as **Asynchronous Key Information Extraction** with AI model and post-processing rules from the base document type.
 
 ### :arrow_right: Request Structure
 
@@ -80,6 +80,10 @@ AI ->> Web: Update document type by id
 Web -->> AI: Return result
 AI ->> Web: Get document type by id
 Web -->> AI: Return result
+AI ->> Web: List document type by name
+Web -->> AI: Return result
+AI ->> Web: List document type by tenant id
+Web -->> AI: Return result
 AI ->> Web: Delete document type by id
 Web -->> AI: Return result
 AI ->> Web: Save document analysis result
@@ -128,6 +132,7 @@ Web -->> AI: Return result
 |Field Name|Type|Description|
 |--|--|--|
 | document_type_id | STRING | Unique identifier for the document type. |
+| tenant_id | STRING | Unique identifier for tenant. |
 | description |STRING|Description for this document type.|
 | active | BOOL | Current active status of the document. If true, user in the same tenant can use this document type. |
 | public | BOOL | If the document type is public, all user can apply it for their own pipeline. This option is only available for the **AI Team** to create global base model.  |
@@ -161,6 +166,41 @@ Web -->> AI: Return result
 |--|--|--|
 | document_type | [DocumentType](#fire-documenttype) | Document Type Object.  |
 
+## :fire: List Document Types by name
+|Endpoint|HTTP Method|
+|--|--|
+|2.0/idp/document_type/get|POST|
+
+### :arrow_right: Request Structure
+
+|Field Name|Type|Description|
+|--|--|--|
+| name | STRING | Human readable name for the document type. |
+
+### :arrow_left: Response Structure
+
+|Field Name|Type|Description|
+|--|--|--|
+| document_types | An array of [DocumentType](#fire-documenttype) | A list of Document Type Object.  |
+
+## :fire: List Document Types by tenant id
+
+|Endpoint|HTTP Method|
+|--|--|
+|2.0/idp/document_type/get|POST|
+
+### :arrow_right: Request Structure
+
+|Field Name|Type|Description|
+|--|--|--|
+| tenant_id | STRING | Unique identifier for the tenant. |
+
+### :arrow_left: Response Structure
+
+|Field Name|Type|Description|
+|--|--|--|
+| document_type | [DocumentType](#fire-documenttype) | Document Type Object.  |
+
 ## :fire: Delete Document Type by id
 
 |Endpoint|HTTP Method|
@@ -184,6 +224,7 @@ TableConfig ||--|{ ColumnConfig: includes
 
 DocumentTypeConfig{
 	string document_type_id
+	string tenant_id
 	string base_document_type_id
 	string name
 	bool active
@@ -191,6 +232,8 @@ DocumentTypeConfig{
 	string language_code
 	string ocr_engine
 	json ai_config
+	int last_update_time
+	int creation_time
 }
 
 FormFieldConfig{
@@ -225,7 +268,7 @@ Document type config
 | document_type_id | STRING | Unique identifier for the document type. |
 | tenant_id | STRING | Unique identifier for the tenant. |
 | base_document_type_id | STRING | The identifier of the base document type for quick set-up and automatic semi-labeling. |
-| name | STRING | Human readable name that identifiers the document type. This name must be unique in each tenant. |
+| name | STRING | Human readable name that identifiers the document type. |
 | active | BOOL | Current active status of the document. If true, user in the same tenant can use this document type. |
 | public | BOOL | If the document type is public, all user can apply it for their own pipeline. This option is only available for the **AI Team** to create base model.  |
 | language_code | STRING | Primary [language code](http://www.lingoes.net/en/translator/langcode.htm) for this document type. |
@@ -289,12 +332,13 @@ Document {
 	string document_id
 	string document_type_id
 	string path
+	string document_class
+	list split_suggestion
 }
 
 Page {
 	int width
 	int height
-	string class
 }
 
 Form {
@@ -345,7 +389,6 @@ Document
 |--|--|--|
 | document_id | STRING | Unique identifier for the document. |
 | document_type_id | STRING | Unique identifier for the document type. |
-| version | STRING  | Document analysis model version. |
 | path | STRING | Path of the original document. |
 | pages | An array of [PageAnalysis](#fire-pageanalysis) | A list of page data. |
 
