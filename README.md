@@ -176,9 +176,9 @@ Web -->> AI: Return result
 
 # :exclamation: Data Structure
 
-## :fire:  DocumentType
+## :fire:  DocumentTypeConfig
 
-Document type
+Document type config
 
 | Field Name | Type | Description |
 |--|--|--|
@@ -219,9 +219,9 @@ Table
 | logic_code | STRING | Python logic code for post-processing. |
 | column_configs | An array for [ColumnConfig](#fire-columnconfig) | A list of configurations for multiple table columns.  **Note** that the table column name must be unique in each table. |
 
-## :fire: ColumnConfig
+## :fire: TableFieldConfig
 
-Column
+Table field config
 
 | Field Name | Type | Description |
 |--|--|--|
@@ -231,9 +231,9 @@ Column
 | required | BOOL | True if this field is required. |
 | logic_code | STRING | Python logic code for post-processing. |
 
-## :fire: DocumentAnalysis
+## :fire: Document
 
-DocumentAnalysis
+Document
 
 | Field Name | Type | Description |
 |--|--|--|
@@ -242,48 +242,81 @@ DocumentAnalysis
 | version | STRING  | Document analysis model version. |
 | path | STRING | Path of the original document. |
 | pages | An array of [PageAnalysis](#fire-pageanalysis) | A list of page data. |
-| num_page | INT64 | Number of pages in the document. |
 
-## :fire: PageAnalysis
+## :fire: Page
 
-PageAnalysis
+Page
 
 | Field Name | Type | Description |
 |--|--|--|
 | width | INT64 | Width of the page image. |
 | height | INT64 | Height of the page image. |
 | class | STRING | Classification result of the page. |
-| text_extraction | [TextExtraction](#fire-textextraction) | text extraction result. |
-| form_extraction | [FormExtraction](#fire-formextraction) | form extraction result. |
-| table_extraction | [TableExtraction](#fire-tableextraction) | table extraction result. |
+| text_extraction | An array of [TextExtraction](#fire-textextraction) | A list of text extraction result. |
+| form_extraction | An array of [FormExtraction](#fire-formextraction) | A list of form extraction result. |
+| table_extraction | An array of [TableExtraction](#fire-tableextraction) | A list of table extraction result. |
 
-## :fire: TextExtraction
+## :fire: TextBox
 
-TextExtraction
-
-| Field Name | Type | Description |
-|--|--|--|
-|  |  |  |
-
-## :fire: FormExtraction
-
-FormExtraction
+Text box
 
 | Field Name | Type | Description |
 |--|--|--|
-|  |  |  |
+| text_boxes | An array of [TextBox](#fire-textbox) | Text content |
 
-## :fire: TableExtraction
+## :fire: Form
 
-TableExtraction
-
-| Field Name | Type | Description |
-|--|--|--|
-| Column |  |  |
-
-# Column
+Form
 
 | Field Name | Type | Description |
 |--|--|--|
-| Key |  |  |
-| Value |  |  |
+| name | STRING | Unique identifier for the form field. |
+| label | [Label](#fire-label) | Form field label.  |
+| value | [Value](#fire-value) | Form field value. |
+
+## :fire: Table
+
+Table
+
+| Field Name | Type | Description |
+|--|--|--|
+| name | STRING | Unique identifier for the table. |
+| columns | An array of [Column](#fire-column) | A list of columns in the table. |
+
+## :fire: Column
+
+| Field Name | Type | Description |
+|--|--|--|
+| name | STRING | Unique identifier for the form field. This could be NONE if the column does not need for extraction. |
+| label | [Label](#fire-label) | Column header.  |
+| values | An array of [Value](#fire-value) | Column values. |
+
+## :fire: TextBox
+
+| Field Name | Type | Description |
+|--|--|--|
+| xmin | FLOAT | Coordinate. |
+| ymin | FLOAT | Coordinate. |
+| xmax | FLOAT | Coordinate. |
+| ymax | FLOAT | Coordinate. |
+| text | STRING | Text value. |
+
+## :fire: Label
+
+| Field Name | Type | Description |
+|--|--|--|
+| xmin | FLOAT | Coordinate. |
+| ymin | FLOAT | Coordinate. |
+| xmax | FLOAT | Coordinate. |
+| ymax | FLOAT | Coordinate. |
+| text_boxes | An array of [TextBox](#fire-textbox) | Text content |
+
+## :fire: Value
+
+| Field Name | Type | Description |
+|--|--|--|
+| xmin | FLOAT | Coordinate. |
+| ymin | FLOAT | Coordinate. |
+| xmax | FLOAT | Coordinate. |
+| ymax | FLOAT | Coordinate. |
+| text_boxes | An array of [TextBox](#fire-textbox) | Text content |
