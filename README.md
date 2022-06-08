@@ -299,10 +299,12 @@ Page {
 
 Form {
 	string name
+	float confidence
 }
 
 Table {
 	string name
+	float confidence
 }
 
 Column {
