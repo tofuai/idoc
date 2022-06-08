@@ -176,6 +176,46 @@ Web -->> AI: Return result
 
 # :exclamation: Data Structure
 
+```mermaid
+erDiagram
+DocumentTypeConfig ||--|{ FormFieldConfig: includes
+DocumentTypeConfig ||--|{ TableConfig: includes
+TableConfig ||--|{ ColumnConfig: includes
+
+DocumentTypeConfig{
+	string document_type_id
+	string base_document_type_id
+	string name
+	bool active
+	bool public
+	string language_code
+	string ocr_engine
+	json ai_config
+}
+
+FormFieldConfig{
+	string name
+	list alias
+	string data_type
+	bool required
+	string logic_code
+}
+
+TableConfig{
+	string name
+	bool required
+	string logic_code
+}
+
+ColumnConfig{
+	string name
+	list alias
+	string data_type
+	bool required
+	string logic_code
+}
+```
+ 
 ## :fire:  DocumentTypeConfig
 
 Document type config
@@ -219,9 +259,9 @@ Table
 | logic_code | STRING | Python logic code for post-processing. |
 | column_configs | An array for [ColumnConfig](#fire-columnconfig) | A list of configurations for multiple table columns.  **Note** that the table column name must be unique in each table. |
 
-## :fire: TableFieldConfig
+## :fire: ColumnFieldConfig
 
-Table field config
+Column field config
 
 | Field Name | Type | Description |
 |--|--|--|
@@ -231,6 +271,70 @@ Table field config
 | required | BOOL | True if this field is required. |
 | logic_code | STRING | Python logic code for post-processing. |
 
+```mermaid
+erDiagram  
+ Document ||--|{ Page: includes
+ Page ||--o{ TextBox: includes
+ Page ||--o{ Form: includes
+ Page ||--o{ Table: includes
+ Form ||--|| Label: includes
+ Form ||--|| Value: includes
+ Table ||--|{ Column: includes
+ Column ||--|| Label: includes
+ Column ||--|{ Value: includes
+ Label ||--|{ TextBox: includes
+ Value ||--|{ TextBox: includes
+
+Document {
+	string document_id
+	string document_type_id
+	string path
+}
+
+Page {
+	int width
+	int height
+	string class
+}
+
+Form {
+	string name
+}
+
+Table {
+	string name
+}
+
+Column {
+	string name
+}
+
+TextBox {
+	float xmin
+	float ymin
+	float xmax
+	float ymax
+	string text
+	float confidence
+}
+
+Label{
+	float xmin
+	float ymin
+	float xmax
+	float ymax
+	float confidence
+}
+
+Value{
+	float xmin
+	float ymin
+	float xmax
+	float ymax
+	float confidence
+}
+ ```
+ 
 ## :fire: Document
 
 Document
